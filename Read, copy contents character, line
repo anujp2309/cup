@@ -1,0 +1,24 @@
+
+#!/bin/bash
+# Input and output file names
+read -p "Enter the source file name: " source_file
+read -p "Enter the destination file name: " destination_file
+# Check if the source file exists
+if [ ! -f "$source_file" ]; then
+    echo "Source file does not exist."
+    exit 1
+fi
+# Copy contents character by character
+echo "Copying contents character by character..."
+while IFS= read -r -n1 char; do
+    echo -n "$char" >> "$destination_file"
+done < "$source_file"
+# Adding a newline after character copy
+echo "" >> "$destination_file"
+# Copy contents line by line
+echo "Copying contents line by line..."
+while IFS= read -r line; do
+    echo "$line" >> "$destination_file"
+done < "$source_file"
+echo "Contents copied successfully to $destination_file."
+
