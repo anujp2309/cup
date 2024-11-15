@@ -1,0 +1,66 @@
+
+#!/bin/bash
+# File to store student records
+DB_FILE="students.txt"
+# Function to display menu
+show_menu() {
+    echo "Choose an operation:"
+    echo "1) Insert"
+    echo "2) Delete"
+    echo "3) Update"
+    echo "4) Search"
+    echo "5) Exit"
+}
+# Function to insert a new student record
+insert_student() {
+    read -p "Enter Student ID: " id
+    read -p "Enter Student Name: " name
+    read -p "Enter Student Age: " age
+    read -p "Enter Student Grade: " grade
+    echo "$id|$name|$age|$grade" >> $DB_FILE
+    echo "Student record inserted successfully."
+}
+
+# Function to delete a student record by ID
+delete_student() {
+    read -p "Enter Student ID to delete: " id
+    grep -v "^$id|" $DB_FILE > temp.txt && mv temp.txt $DB_FILE
+    echo "Student record deleted if ID was found."
+}
+
+# Function to update a student record by ID
+update_student() {
+    read -p "Enter Student ID to update: " id
+    if grep -q "^$id|" $DB_FILE; then
+        grep -v "^$id|" $DB_FILE > temp.txt
+        mv temp.txt $DB_FILE
+        read -p "Enter new Name: " name
+        read -p "Enter new Age: " age
+        read -p "Enter new Grade: " grade
+        echo "$id|$name|$age|$grade" >> $DB_FILE
+        echo "Student record updated successfully."
+    else
+        echo "Student ID not found."
+    fi
+}
+
+# Function to search for a student record by ID
+search_student() {
+    read -p "Enter Student ID to search: " id
+    grep "^$id|" $DB_FILE && echo "Record found." || echo "Record not found."
+}
+# Main script loop
+while true; do
+    show_menu
+    read -p "Enter your choice: " choice
+    case $choice in
+        1) insert_student ;;
+        2) delete_student ;;
+        3) update_student ;;
+        4) search_student ;;
+        5) exit 0 ;;
+        *) echo "Invalid choice, please try again." ;;
+    esac
+done
+
+
