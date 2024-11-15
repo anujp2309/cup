@@ -1,0 +1,44 @@
+
+#!/bin/bash
+# List of valid opcodes (example list)
+VALID_OPCODES=("MOV" "ADD" "SUB" "MUL" "DIV" "INT" "JMP" "CMP" "CALL" "RET")
+# Input ALP file
+read -p "Enter the ALP input file name: " input_file
+# Check if the input ALP file exists
+if [ ! -f "$input_file" ]; then
+    echo "Input file does not exist."
+    exit 1
+fi
+# Function to check opcode validity
+check_opcode() {
+    local opcode=$1
+    for valid_opcode in "${VALID_OPCODES[@]}"; do
+        if [[ "$opcode" == "$valid_opcode" ]]; then
+            return 0  # Opcode is valid
+        fi
+    done
+    return 1  # Opcode is invalid
+}
+# Reading the input file line by line to check for opcode errors
+echo "Checking for opcode errors..."
+line_number=1
+error_found=false
+while IFS= read -r line; do
+    # Extract the first word (opcode) from the line
+    opcode=$(echo "$line" | awk '{print $1}')
+    
+    # Check if the extracted opcode is valid
+    if ! check_opcode "$opcode"; then
+        echo "Error: Invalid opcode '$opcode' found on line $line_number."
+        error_found=true
+        # Simulate raising an interrupt by printing a message
+        echo "Interrupt raised due to opcode error."
+        break
+    fi
+    ((line_number++))
+done < "$input_file"
+if [ "$error_found" = false ]; then
+    echo "No opcode errors found. Job is valid."
+fi
+
+
