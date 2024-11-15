@@ -1,0 +1,77 @@
+
+
+#!/bin/bash
+
+# List of valid opcodes and expected operand count (example list)
+declare -A VALID_OPCODES
+VALID_OPCODES["MOV"]=2
+VALID_OPCODES["ADD"]=2
+VALID_OPCODES["SUB"]=2
+VALID_OPCODES["MUL"]=2
+VALID_OPCODES["DIV"]=2
+VALID_OPCODES["INT"]=1
+VALID_OPCODES["JMP"]=1
+VALID_OPCODES["CMP"]=2
+VALID_OPCODES["CALL"]=1
+VALID_OPCODES["RET"]=0
+
+# Input ALP file
+read -p "Enter the ALP input file name: " input_file
+
+# Check if the input ALP file exists
+if [ ! -f "$input_file" ]; then
+    echo "Input file does not exist."
+    exit 1
+fi
+
+# Function to check operand validity
+check_operand() {
+    local opcode=$1
+    local operand_count=$2
+
+    if [[ -v VALID_OPCODES["$opcode"] ]]; then
+        if [ "${VALID_OPCODES["$opcode"]}" -ne "$operand_count" ]; then
+            return 1  # Operand count is incorrect
+        fi
+    else
+        return 2  # Invalid opcode
+    fi
+
+    return 0  # Operand is valid
+}
+
+# Reading the input file line by line to check for operand errors
+echo "Checking for operand errors..."
+line_number=1
+error_found=false
+
+while IFS= read -r line; do
+    # Extract opcode and operands from the line
+    opcode=$(echo "$line" | awk '{print $1}')
+    operands=$(echo "$line" | cut -d' ' -f2-)
+    operand_count=$(echo "$operands" | tr ',' ' ' | wc -w)
+
+    # Check if the opcode is valid and if the operand count is correct
+    if ! check_operand "$opcode" "$operand_count"; then
+        if [ $? -eq 1 ]; then
+            echo "Error: Operand count mismatch for opcode '$opcode' on line $line_number."
+            error_found=true
+            # Simulate raising an interrupt by printing a message
+            echo "Interrupt raised due to operand error."
+            break
+        elif [ $? -eq 2 ]; then
+            echo "Error: Invalid opcode '$opcode' found on line $line_number."
+            error_found=true
+            echo "Interrupt raised due to invalid opcode."
+            break
+        fi
+    fi
+    
+    ((line_number++))
+done < "$input_file"
+
+if [ "$error_found" = false ]; then
+    echo "No operand errors found. Job is valid."
+fi
+
+
